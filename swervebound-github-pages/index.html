@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#061d2c" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="./icon-192.png" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <meta name="description" content="Swervebound — a colorful, quick-play driving arcade game. Dodge traffic, collect coins and beat your high score!" />
+  <title>Swervebound — Endless Driving Arcade</title>
+  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="./menu.css" />
+</head>
+<body>
+  <main class="game-shell" id="game-shell">
+    <canvas id="game" aria-label="Four-lane endless driving game with two-way traffic. Avoid cars and collect coins." role="img"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand" aria-label="Swervebound">
+        <div class="brand-icon"><img src="./icon-192.png" alt="" width="43" height="43" /></div>
+        <div class="brand-copy"><span>SWERVE</span><span>BOUND<span class="brand-dot">.</span></span></div>
+      </div>
+      <div class="stats" aria-live="off">
+        <div class="stat"><span class="stat-label">SCORE</span><strong id="score">0</strong></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-label">COINS</span><strong><span class="coin-mark">●</span> <span id="coins">0</span></strong></div>
+        <div class="stat-divider optional"></div>
+        <div class="stat optional"><span class="stat-label">BEST</span><strong id="best">0</strong></div>
+      </div>
+      <div class="tools">
+        <button class="icon-button" id="sound-btn" type="button" aria-label="Turn sound off" title="Toggle sound">
+          <svg id="sound-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        </button>
+        <button class="icon-button" id="pause-btn" type="button" aria-label="Pause game" title="Pause game">
+          <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="speed-chip" id="speed-chip" aria-hidden="true"><span class="speed-live"></span> <span id="speed">72</span> <small>KM/H</small></div>
+    <div class="flight-indicator" id="flight-indicator" hidden aria-live="off"><span>✦ FLIGHT</span> <strong id="flight-seconds">5.0s</strong></div>
+
+    <section class="overlay" id="overlay" aria-live="polite">
+      <div class="overlay-shine"></div>
+      <div class="modal" id="modal">
+        <div class="eyebrow"><span class="sparkle">✦</span> HIGHWAY ARCADE / RUN MODE <span class="sparkle">✦</span></div>
+        <div class="game-illustration game-illustration-logo" aria-hidden="true">
+          <img src="./icon-512.png" alt="" width="150" height="150" />
+        </div>
+        <h1 id="modal-title">SWERVE<br /><span>BOUND!</span></h1>
+        <p class="modal-subtitle" id="modal-subtitle">Two-way traffic. Different speeds.<br />Dodge cars, grab coins, and keep driving!</p>
+        <div class="results" id="results" hidden>
+          <div class="result-item"><small>YOUR SCORE</small><strong id="final-score">0</strong></div>
+          <div class="result-item"><small>BEST SCORE</small><strong id="final-best">0</strong></div>
+        </div>
+        <div class="revive-option" id="revive-option" hidden>
+          <button class="revive-button" id="revive-btn" type="button">▶ WATCH AD TO REVIVE <span>♥</span></button>
+          <small>ONE REVIVE PER RUN · 15-SECOND DEMO AD</small>
+        </div>
+        <button class="play-button" id="play-btn" type="button">START DRIVING <span>➜</span></button>
+        <button class="return-menu-button" id="menu-return-btn" type="button" hidden>BACK TO MAIN MENU</button>
+        <div class="how-to"><span class="how-icon">↔</span> <span>SWIPE OR USE <kbd>←</kbd> <kbd>→</kbd> TO STEER</span></div>
+        <div class="traffic-legend" aria-label="Blue cars are slowest; red cars are fastest"><span><i class="slow-dot"></i> SLOWER</span><span>CAR COLORS = SPEED</span><span><i class="fast-dot"></i> FASTER</span></div>
+      </div>
+
+      <section class="home-menu" id="home-menu" aria-label="Swervebound main menu" hidden>
+        <header class="hub-header">
+          <div class="hub-logo">
+            <span class="hub-logo-icon"><img src="./icon-192.png" alt="" width="48" height="48" /></span>
+            <div><strong>SWERVE<em>BOUND.</em></strong><small>STREET ARCADE / SEASON 01</small></div>
+          </div>
+          <div class="hub-wallet" aria-label="Available coins"><span class="wallet-coin">★</span><div><small>YOUR WALLET</small><strong id="hub-balance">0</strong></div><span class="wallet-plus">+</span></div>
+        </header>
+
+        <div class="hub-layout">
+          <nav class="hub-nav" aria-label="Main menu tabs">
+            <span class="hub-nav-label">YOUR DASHBOARD</span>
+            <button type="button" class="active" data-hub-tab="home" aria-selected="true"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M3.7 9.5 10 11m4 0 6.3-1.5M12 14v7"/></svg><span class="nav-name">DRIVE</span><span class="nav-chevron">→</span></button>
+            <button type="button" data-hub-tab="garage" aria-selected="false"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 10 12 3.5l9.5 6.5v11H2.5V10Z"/><path d="M6 20.5v-9h12v9"/><path d="m7.5 16.5 1.3-2.7h6.4l1.3 2.7v4H7.5z" fill="currentColor" fill-opacity=".14"/><path d="M7.5 16.5h9M9.7 19h.1m4.5 0h.1"/></svg><span class="nav-name">GARAGE</span><span class="nav-chevron">→</span></button>
+            <button type="button" data-hub-tab="daily" aria-selected="false"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M12 9v12M3 13h18M12 9S5 8 5 5c0-4 7-1 7 4Zm0 0s7-1 7-4c0-4-7-1-7 4Z"/></svg><span class="nav-name">DAILY</span><span class="nav-chevron">→</span></button>
+            <button type="button" data-hub-tab="shop" aria-selected="false"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16l-1 13H5L4 8ZM9 8V6a3 3 0 0 1 6 0v2"/><path d="M9 12v2m6-2v2"/></svg><span class="nav-name">SHOP</span><span class="nav-chevron">→</span></button>
+            <div class="hub-nav-note"><span class="nav-note-square"></span> YOUR ROAD. YOUR RULES.</div>
+          </nav>
+
+          <div class="hub-content" id="hub-content">
+            <section class="hub-screen" data-hub-screen="home" aria-label="Drive">
+              <div class="hub-hero">
+                <div class="hub-hero-copy">
+                  <span class="hub-kicker"><span class="pulse-dot"></span> THE HIGHWAY IS OPEN</span>
+                  <h1>OWN<br />THE <em>ROAD.</em></h1>
+                  <p>Four lanes. Two-way traffic. One endless run.</p>
+                  <button type="button" class="hub-start-button" id="hub-start-btn">START DRIVING <span>→</span></button>
+                  <div class="hub-hero-hint">SWIPE OR PRESS ← → TO STEER</div>
+                </div>
+                <div class="hub-hero-art" aria-hidden="true"><canvas id="hero-game-shot" class="menu-game-shot"></canvas><span class="hero-scene-label">ACTUAL GAMEPLAY VIEW</span><div class="hero-challenge"><span>✦ NEXT SCORE TARGET</span><strong id="challenge-target">2,000</strong><small id="challenge-nudge">READY FOR A NEW BEST?</small></div><span class="hero-corner-number">01 / SWERVEBOUND</span></div>
+              </div>
+              <div class="hub-bottom-cards">
+                <div class="hub-stat-card"><small>PERSONAL BEST</small><strong id="hub-best">0</strong><span>METERS + COINS = POINTS</span></div>
+                <button type="button" class="hub-shortcut" data-hub-tab="daily"><span class="shortcut-icon">★</span><span><small>FREE COINS</small><strong>DAILY REWARDS</strong></span><b>→</b></button>
+                <button type="button" class="hub-shortcut" data-hub-tab="garage"><span class="shortcut-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M2.5 10 12 3.5l9.5 6.5v11H2.5V10Z"/><path d="M6 20.5v-9h12v9"/><path d="m7.5 16.5 1.3-2.7h6.4l1.3 2.7v4H7.5z"/><path d="M7.5 16.5h9M9.7 19h.1m4.5 0h.1"/></svg></span><span><small>YOUR RIDE</small><strong>CUSTOMIZE</strong></span><b>→</b></button>
+              </div>
+            </section>
+
+            <section class="hub-screen" data-hub-screen="garage" aria-label="Garage" hidden>
+              <div class="hub-screen-heading"><span class="hub-kicker">02 / MAKE IT YOURS</span><h2>YOUR <em>GARAGE.</em></h2><p>Change your car's paint and underglow. Equipped styles appear on the road.</p></div>
+              <div class="garage-layout">
+                <div class="garage-preview">
+                  <canvas id="garage-game-shot" class="menu-game-shot" aria-label="Preview of your car rendered from the game"></canvas>
+                  <span class="garage-preview-tag">ACTUAL IN-GAME CAR</span>
+                  <div class="garage-equipped-label" id="garage-equipped-label">POLAR WHITE / STOCK</div>
+                </div>
+                <div class="garage-options">
+                  <div class="garage-category-title"><h3>BODY PAINT</h3><span>CHOOSE YOUR COLOR</span></div>
+                  <div class="garage-palette" id="garage-paints"></div>
+                  <div class="garage-category-title"><h3>UNDERGLOW</h3><span>NEON ROAD EFFECT</span></div>
+                  <div class="garage-palette" id="garage-glows"></div>
+                  <button type="button" class="garage-shop-link" data-hub-tab="shop">UNLOCK MORE STYLES IN THE SHOP <span>→</span></button>
+                </div>
+              </div>
+            </section>
+
+            <section class="hub-screen" data-hub-screen="daily" aria-label="Daily rewards" hidden>
+              <div class="hub-screen-heading"><span class="hub-kicker">03 / YOUR DAILY BOOST</span><h2>DAILY <em>REWARDS.</em></h2><p>Check in every day to build your streak and collect free coins.</p></div>
+              <div class="daily-spotlight"><div><span class="daily-spotlight-small">YOUR NEXT CLAIM</span><strong id="daily-next-amount">+30 <small>COINS</small></strong><span id="daily-status">DAY 1 IS READY</span></div><div class="daily-streak-badge"><strong id="daily-streak-number">0</strong><span>DAY STREAK</span></div></div>
+              <div class="daily-grid" id="daily-grid"></div>
+              <button type="button" id="daily-claim-btn" class="daily-claim-button">CLAIM TODAY'S REWARD <span>→</span></button>
+              <p class="daily-footnote">One claim per local calendar day. Miss a day and your seven-day streak restarts.</p>
+            </section>
+
+            <section class="hub-screen" data-hub-screen="shop" aria-label="Shop" hidden>
+              <div class="hub-screen-heading"><span class="hub-kicker">04 / THE STYLE MARKET</span><h2>THE <em>SHOP.</em></h2><p>Spend coins earned from driving and daily check-ins. Your unlocked styles are saved in this browser.</p></div>
+              <div class="shop-intro"><span>AVAILABLE BALANCE</span><strong><span class="shop-coin-symbol">★</span> <span id="shop-balance">0</span></strong><small>COLLECT COINS ON THE ROAD TO EARN MORE</small></div>
+              <div class="shop-category-title">CAR PAINTS <span>COLOR COLLECTION</span></div>
+              <div class="shop-products" id="shop-paints"></div>
+              <div class="shop-category-title">UNDERGLOW <span>NEON COLLECTION</span></div>
+              <div class="shop-products" id="shop-glows"></div>
+            </section>
+          </div>
+        </div>
+        <div class="hub-footer"><span>SWERVEBOUND / YOUR NEXT RUN STARTS HERE</span><span>COLLECT • CUSTOMIZE • DRIVE</span></div>
+        <div class="hub-toast" id="hub-toast" role="status" aria-live="polite"></div>
+        <div class="hub-celebration" id="hub-celebration" aria-hidden="true"></div>
+      </section>
+      <div class="overlay-footer">SWERVEBOUND <span> // </span> CHASE YOUR HIGH SCORE</div>
+    </section>
+
+    <section class="rewarded-ad" id="rewarded-ad" hidden aria-label="Rewarded demo advertisement" aria-live="polite">
+      <div class="ad-panel">
+        <div class="ad-top">
+          <div class="ad-identity"><span class="ad-mark"><img src="./icon-192.png" alt="" width="40" height="40" /></span><div><strong>SWERVEBOUND</strong><span class="ad-label">REWARDED AD // DEMO</span></div></div>
+          <div class="ad-timer"><small>TIME LEFT</small><span class="ad-count" id="ad-count">15s</span></div>
+        </div>
+        <div class="ad-stage" aria-label="Animated preview for the Swervebound Garage">
+          <div class="ad-sky-glow"></div>
+          <div class="ad-road"><div class="ad-road-line"></div></div>
+          <div class="ad-garage-car"><div class="ad-garage-window"></div><div class="ad-garage-lights"></div></div>
+          <div class="ad-stage-copy"><span>COMING SOON // CUSTOMIZATION</span><strong>THE <i>GARAGE</i></strong><em>COLLECT COINS. UNLOCK RIDES.</em></div>
+          <div class="ad-stage-sticker" aria-hidden="true">UPGRADE<br />YOUR RIDE <span>→</span></div>
+        </div>
+        <div class="ad-bottom">
+          <div class="ad-reward"><span class="ad-heart">♥</span><div><strong>ONE MORE SHOT</strong><small>Finish the ad to revive with your score.</small></div></div>
+          <div class="ad-progress-track"><div class="ad-progress-fill" id="ad-progress-fill"></div></div>
+          <div class="ad-bottom-row"><span id="ad-message">15 seconds remaining</span><button id="ad-cancel" type="button">CANCEL &amp; RETURN</button></div>
+          <p class="ad-disclaimer">This is a demo ad for testing. No paid advertiser is connected yet.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="bottom-ui">
+      <div class="help-pill" id="help-pill">◀ SWIPE TO SWITCH LANES ▶</div>
+      <div class="touch-controls" aria-label="Steering controls">
+        <button id="left-btn" class="steer" type="button" aria-label="Move one lane left">←</button>
+        <button id="right-btn" class="steer" type="button" aria-label="Move one lane right">→</button>
+      </div>
+    </div>
+    <div id="toast" class="toast" aria-live="polite"></div>
+  </main>
+  <script src="./menu.js" defer></script>
+  <script src="./traffic-director.js" defer></script>
+  <script src="./lane-controls.js" defer></script>
+  <script src="./score-powerups.js" defer></script>
+  <script src="./game.js" defer></script>
+  <script>if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));</script>
+</body>
+</html>
